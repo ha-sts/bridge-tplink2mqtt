@@ -39,6 +39,11 @@ def main():
     log_format = "%(asctime)s:%(levelname)s:%(name)s.%(funcName)s: %(message)s"
     logging.basicConfig(format = log_format, level = logging.DEBUG)
 
+    # https://github.com/sbtinstruments/asyncio-mqtt#note-for-windows-users
+    # For not just Windows: Change to the "Selector" event loop
+    # This is needed on Python 3.9 even on "teh lunix".
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     loop = asyncio.get_event_loop()
 
     tpldm = TPLinkDeviceManager(TARGET_NETWORK_BROADCAST)
