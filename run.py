@@ -85,6 +85,7 @@ def main():
     hbt = HeartbeatTickler()
     hbt.add_corofunc(tpldm.heartbeat)
 
+    task_mqtt_listener = loop.create_task(mqttc.run())
     task_discovery = loop.create_task(tpldm.discover_devices())
     task_tickler = loop.create_task(hbt.run())
 
