@@ -35,7 +35,16 @@ class HS200US(TPLinkDevice):
 
     async def _handle_message(self, message):
         self.logger.debug("received message: %s", message)
-        # FIXME: handle payloads
+        # FIXME: Put better type checking / bad data handling here
+        tmp_payload = message.payload.decode('utf-8')
+        if tmp_payload == 'on':
+            # Send the turn on command
+            await self._kasa_device.turn_on()
+        elif tmp_payload == 'off':
+            # Send the turn off command
+            await self._kasa_device.turn_off()
+        # Run the heartbeat to update the state.
+        await self.heartbeat()
 
     async def register_coroutines(self):
         # FIXME: Can refactory this to be a nice data structure that the base class processes.
