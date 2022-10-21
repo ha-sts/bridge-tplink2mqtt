@@ -68,7 +68,7 @@ def main():
         "--always-publish",
         action = "store_true",
         help = "Always publish the state information when performing the heartbeat updates.",
-        default = os.getenv("HASTS_ALWAYS_PUBLISH", False)
+        default = (os.getenv("HASTS_ALWAYS_PUBLISH", "false") in ['TRUE', 'True', 'true'])
     )
     args = parser.parse_args()
 
