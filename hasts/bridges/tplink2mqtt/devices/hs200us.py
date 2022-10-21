@@ -15,8 +15,8 @@ class HS200US(TPLinkDevice):
     1 output, no dimming
     no energy monitoring
     """
-    def __init__(self, mqtt_client, kasa_device):
-        super().__init__(mqtt_client, kasa_device)
+    def __init__(self, mqtt_client, kasa_device, always_publish = False):
+        super().__init__(mqtt_client, kasa_device, always_publish)
         # self.logger = logging.getLogger(type(self).__name__)
         self.logger.debug("Inputs - mqtt_client: %s, device: %s", mqtt_client, kasa_device)
         # FIXME: Does super().__init__(...) use the correct __name__ for the logger?
@@ -24,7 +24,7 @@ class HS200US(TPLinkDevice):
 
     async def _check_outputs(self):
         self.logger.debug("Checking outputs")
-        if self._kasa_device.is_on != self._previous_output:
+        if self.always_publish or (self._kasa_device.is_on != self._previous_output):
             # State changed, so update previous and emit a message
             self._previous_output = self._kasa_device.is_on
             # Should the MAC address have the ':' characters removed?

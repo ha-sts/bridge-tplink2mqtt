@@ -13,12 +13,13 @@ from .devices import get_device_class
 
 ### CLASSES ###
 class TPLinkDeviceManager:
-    def __init__(self, mqtt_client, tnba = None):
+    def __init__(self, mqtt_client, tnba = None, always_publish = False):
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.debug("Inputs - mqtt_client: %s, tnba: %s", mqtt_client, tnba)
         self._mqtt_client = mqtt_client
         self.target_network_broadcast_address = tnba
         self.devices = []
+        self.always_publish = always_publish
 
     async def discover_devices(self):
         # This method runs the kasa library discovery mechanism with a coroutine
@@ -58,7 +59,7 @@ class TPLinkDeviceManager:
         self.logger.debug("Inputs - kasa_device: %s", kasa_device)
         dev_class = get_device_class(kasa_device.model)
         self.logger.debug("dev_class: %s", dev_class)
-        tmp_dev = dev_class(self._mqtt_client, kasa_device)
+        tmp_dev = dev_class(self._mqtt_client, kasa_device, self.always_publish)
         self.devices.append(tmp_dev)
         self.logger.debug("self.devices: %s", self.devices)
         # FIXME: Register to MQTT

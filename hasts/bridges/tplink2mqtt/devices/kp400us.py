@@ -15,8 +15,8 @@ class KP400US(TPLinkDevice):
     2 outputs, no dimming
     no energy monitoring
     """
-    def __init__(self, mqtt_client, kasa_device):
-        super().__init__(mqtt_client, kasa_device)
+    def __init__(self, mqtt_client, kasa_device, always_publish = False):
+        super().__init__(mqtt_client, kasa_device, always_publish)
         # self.logger = logging.getLogger(type(self).__name__)
         self.logger.debug("Inputs - mqtt_client: %s, device: %s", mqtt_client, kasa_device)
         # FIXME: Does super().__init__(...) use the correct __name__ for the logger?
@@ -26,7 +26,7 @@ class KP400US(TPLinkDevice):
     async def _check_outputs(self):
         self.logger.debug("Checking outputs")
         # First Plug
-        if self._kasa_device.get_plug_by_index(0).is_on != self._previous_output_0:
+        if self.always_publish or (self._kasa_device.get_plug_by_index(0).is_on != self._previous_output_0):
             # State changed, so update previous and emit a message
             self._previous_output_0 = self._kasa_device.get_plug_by_index(0).is_on
             # Should the MAC address have the ':' characters removed?
@@ -35,7 +35,7 @@ class KP400US(TPLinkDevice):
                 "on" if self._kasa_device.get_plug_by_index(0).is_on else "off"
             )
         # Second Plug
-        if self._kasa_device.get_plug_by_index(1).is_on != self._previous_output_1:
+        if self.always_publish or (self._kasa_device.get_plug_by_index(1).is_on != self._previous_output_1):
             # State changed, so update previous and emit a message
             self._previous_output_1 = self._kasa_device.get_plug_by_index(1).is_on
             # Should the MAC address have the ':' characters removed?

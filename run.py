@@ -64,6 +64,12 @@ def main():
         help = "Broadcast address of the network containing the TPLink devices.  Defaults to '255.255.255.255'.",
         default = os.getenv("HASTS_TPLINK_TARGET_BROADCAST")
     )
+    parser.add_argument(
+        "--always-publish",
+        action = "store_true",
+        help = "Always publish the state information when performing the heartbeat updates.",
+        default = os.getenv("HASTS_ALWAYS_PUBLISH", False)
+    )
     args = parser.parse_args()
 
     # Setup Logging
@@ -80,8 +86,17 @@ def main():
 
     # FIXME: Look into the contextlib / context manager stuff
 
-    mqttc = MqttClient(host = args.mqtt_host, port = args.mqtt_port, user = args.username, password = args.password)
-    tpldm = TPLinkDeviceManager(mqtt_client = mqttc, tnba = args.tplink_target_broadcast)
+    mqttc = MqttClient(
+        host = args.mqtt_host,
+        port = args.mqtt_port,
+        user = args.username,
+        password = args.password
+    )
+    tpldm = TPLinkDeviceManager(
+        mqtt_client = mqttc,
+        tnba = args.tplink_target_broadcast,
+        always_publish = True if args.always_publish else False
+    )
     hbt = HeartbeatTickler()
     hbt.add_corofunc(tpldm.heartbeat)
 

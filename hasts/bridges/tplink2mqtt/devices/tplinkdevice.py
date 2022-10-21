@@ -25,7 +25,7 @@ class TPLinkDevice:
     the different device types have different outputs, it will likely be
     required to sub-class this with specifics about the different device types.
     """
-    def __init__(self, mqtt_client, kasa_device):
+    def __init__(self, mqtt_client, kasa_device, always_publish = False):
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.debug("Inputs - mqtt_client: %s, device: %s", mqtt_client, kasa_device)
         self._mqtt_client = mqtt_client
@@ -36,6 +36,7 @@ class TPLinkDevice:
         #        automagically?
         self.host = self._kasa_device.host
         self.mac = self._kasa_device.mac
+        self.always_publish = always_publish
 
     async def _check_outputs(self):
         raise NotImplementedError
