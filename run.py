@@ -78,12 +78,9 @@ def main():
     # Setup the async tasks
     loop = asyncio.get_event_loop()
 
-    mqttc = MqttClient(
-        host = args.mqtt_host,
-        port = args.mqtt_port,
-        user = args.username,
-        password = args.password
-    )
+    # FIXME: Look into the contextlib / context manager stuff
+
+    mqttc = MqttClient(host = args.mqtt_host, port = args.mqtt_port, user = args.username, password = args.password)
     tpldm = TPLinkDeviceManager(mqtt_client = mqttc, tnba = args.tplink_target_broadcast)
     hbt = HeartbeatTickler()
     hbt.add_corofunc(tpldm.heartbeat)

@@ -32,3 +32,5 @@ class HS200US(TPLinkDevice):
                 "hasts/switch/{}/0/state".format(self.mac),
                 "on" if self._kasa_device.is_on else "off"
             )
+
+    # hasts/switch/{mac}/0/change_state -> "on" or "off"
