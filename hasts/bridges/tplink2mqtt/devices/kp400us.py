@@ -54,22 +54,22 @@ class KP400US(TPLinkDevice):
 
     async def register_coroutines(self):
         self.logger.debug("Registering coroutines")
-        self._mqtt_client.register_topic_coroutine(
+        await self._mqtt_client.register_topic_coroutine(
             "hasts/switch/{}/0/change_state".format(self.mac),
             self._handle_message_0
         )
-        self._mqtt_client.register_topic_coroutine(
+        await self._mqtt_client.register_topic_coroutine(
             "hasts/switch/{}/1/change_state".format(self.mac),
             self._handle_message_1
         )
 
     async def unregister_coroutines(self):
         self.logger.debug("Unregistering coroutines")
-        self._mqtt_client.unregister_topic_coroutine(
+        await self._mqtt_client.unregister_topic_coroutine(
             "hasts/switch/{}/0/change_state".format(self.mac),
             self._handle_message_0
         )
-        self._mqtt_client.unregister_topic_coroutine(
+        await self._mqtt_client.unregister_topic_coroutine(
             "hasts/switch/{}/1/change_state".format(self.mac),
             self._handle_message_1
         )
