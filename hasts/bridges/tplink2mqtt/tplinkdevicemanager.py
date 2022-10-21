@@ -60,7 +60,7 @@ class TPLinkDeviceManager:
         dev_class = get_device_class(kasa_device.model)
         self.logger.debug("dev_class: %s", dev_class)
         tmp_dev = dev_class(self._mqtt_client, kasa_device, self.always_publish)
-        tmp_dev.register_couroutines()
+        tmp_dev.register_coroutines()
         self.devices.append(tmp_dev)
         self.logger.debug("self.devices: %s", self.devices)
 
