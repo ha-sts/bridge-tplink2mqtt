@@ -60,14 +60,14 @@ class TPLinkDeviceManager:
         dev_class = get_device_class(kasa_device.model)
         self.logger.debug("dev_class: %s", dev_class)
         tmp_dev = dev_class(self._mqtt_client, kasa_device, self.always_publish)
-        tmp_dev.register_coroutines()
+        await tmp_dev.register_coroutines()
         self.devices.append(tmp_dev)
         self.logger.debug("self.devices: %s", self.devices)
 
     async def _remove_device(self, tp_device):
         self.logger.debug("Inputs - tp_device: %s", tp_device)
         self.devices.remove(tp_device)
-        tp_device.unregister_coroutines()
+        await tp_device.unregister_coroutines()
         self.logger.debug("self.devices: %s", self.devices)
 
     async def heartbeat(self):
