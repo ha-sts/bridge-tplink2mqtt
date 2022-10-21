@@ -39,7 +39,11 @@ class MqttClient:
                         await client.subscribe("hasts/#")
                         async for message in messages:
                             # Call a method to check topics and route commands
-                            self.logger.debug("message: %s", message)
+                            self.logger.debug("Received message:")
+                            self.logger.debug("  topic: %s", message.topic)
+                            self.logger.debug("  payload: %s", message.payload)
+                            self.logger.debug("  qos: %s", message.qos)
+                            await self._relay_message_to_topic_coroutines(message)
             except asyncio_mqtt.MqttError as error:
                 self.logger.warning("MQTT Error: %s")
                 if self.reconnect_interval > 0:

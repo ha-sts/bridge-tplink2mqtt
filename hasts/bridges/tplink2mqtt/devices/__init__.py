@@ -14,6 +14,7 @@ MODEL_DICT = {
 ### FUNCTIONS ###
 def get_device_class(model_str):
     # Lookup the correct device class based on the model number.
+    # FIXME: How to ignore unsupported models without raising a KeyError here?
     return MODEL_DICT[model_str]
 
 ### CLASSES ###
