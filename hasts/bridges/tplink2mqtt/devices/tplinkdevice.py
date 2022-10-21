@@ -45,6 +45,9 @@ class TPLinkDevice:
         # By default, there's no energy metering.
         pass
 
+    async def register_coroutines(self):
+        raise NotImplementedError
+
     async def heartbeat(self):
         self.logger.debug("Heartbeat")
         # Try a device update.

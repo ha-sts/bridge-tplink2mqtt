@@ -33,4 +33,22 @@ class HS200US(TPLinkDevice):
                 "on" if self._kasa_device.is_on else "off"
             )
 
-    # hasts/switch/{mac}/0/change_state -> "on" or "off"
+    async def _handle_message(self, message):
+        self.logger.debug("received message: %s", message)
+        # FIXME: handle payloads
+
+    async def register_coroutines(self):
+        # FIXME: Can refactory this to be a nice data structure that the base class processes.
+        self.logger.debug("Registering coroutines")
+        self._mqtt_client.register_topic_coroutine(
+            "hasts/switch/{}/0/change_state".format(self.mac),
+            self._handle_message
+        )
+
+    async def unregister_coroutines(self):
+        # FIXME: Can refactory this to be a nice data structure that the base class processes.
+        self.logger.debug("Unregistering coroutines")
+        self._mqtt_client.unregister_topic_coroutine(
+            "hasts/switch/{}/0/change_state".format(self.mac),
+            self._handle_message
+        )

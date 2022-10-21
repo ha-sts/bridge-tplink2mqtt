@@ -22,6 +22,7 @@ class MqttClient:
         self._running = False
         self._stop = False
         self.reconnect_interval = 3
+        self._topic_coroutines = []
 
     async def run(self):
         while not self._stop:
@@ -47,6 +48,30 @@ class MqttClient:
                 else:
                     # Not reconnecting, so stop the loop
                     self._stop = True
+
+    async def register_topic_coroutine(self, topic, coroutine):
+        # Register a coroutine (async function) to get tasked when a message matching the topic arrives
+        # FIXME: Support wildcard paths in the future
+        self._topic_coroutines.append({
+            "topic": topic,
+            "coroutine": coroutine
+        })
+
+    async def unregister_topic_coroutine(self, topic, coroutine):
+        # Unregister a coroutine
+        # FIXME: Support wildcards?
+        # FIXME: Should this be 'unregister_coroutine' that would remove all references to the coroutine?
+        for item in self._topic_coroutines:
+            if item['topic'] == topic and item['coroutine'] == coroutine:
+                self._topic_coroutines.remove(item)
+
+    async def _relay_message_to_topic_coroutines(self, message):
+        # Send the received message to any registered coroutines with a matching topic
+        for item in self._topic_coroutines:
+            # FIXME: Support wildcard paths in the future
+            if item['topic'] == message.topic:
+                tmp_coro = item['coroutine']
+                asyncio.create_task(tmp_coro(message))
 
     async def publish(self, topic, payload):
         tmp_client = await self._get_client()

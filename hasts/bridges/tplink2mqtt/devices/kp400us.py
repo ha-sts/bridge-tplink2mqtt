@@ -43,3 +43,33 @@ class KP400US(TPLinkDevice):
                 "hasts/switch/{}/1/state".format(self.mac),
                 "on" if self._kasa_device.get_plug_by_index(1).is_on else "off"
             )
+
+    async def _handle_message_0(self, message):
+        self.logger.debug("received message: %s", message)
+        # FIXME: handle payloads
+
+    async def _handle_message_1(self, message):
+        self.logger.debug("received message: %s", message)
+        # FIXME: handle payloads
+
+    async def register_coroutines(self):
+        self.logger.debug("Registering coroutines")
+        self._mqtt_client.register_topic_coroutine(
+            "hasts/switch/{}/0/change_state".format(self.mac),
+            self._handle_message_0
+        )
+        self._mqtt_client.register_topic_coroutine(
+            "hasts/switch/{}/1/change_state".format(self.mac),
+            self._handle_message_1
+        )
+
+    async def unregister_coroutines(self):
+        self.logger.debug("Unregistering coroutines")
+        self._mqtt_client.unregister_topic_coroutine(
+            "hasts/switch/{}/0/change_state".format(self.mac),
+            self._handle_message_0
+        )
+        self._mqtt_client.unregister_topic_coroutine(
+            "hasts/switch/{}/1/change_state".format(self.mac),
+            self._handle_message_1
+        )
