@@ -8,22 +8,12 @@ import os
 
 import asyncio_mqtt
 
+from hasts.bridges.tplink2mqtt import MqttClient
 from hasts.bridges.tplink2mqtt import TPLinkDeviceManager
 
 ### GLOBALS ###
 
 ### FUNCTIONS ###
-async def get_mqtt_client(host, port, user, password):
-    # It may be good to turn this into a wrapper class for the TPLinkDevice
-    # objects to interact with instead of having them work directly with the
-    # MQTT client object.
-    client = asyncio_mqtt.Client(
-        hostname = host,
-        port = port,
-        username = user,
-        password = password
-    )
-    await client.connect()
 
 ### CLASSES ###
 class HeartbeatTickler:
@@ -88,13 +78,13 @@ def main():
     # Setup the async tasks
     loop = asyncio.get_event_loop()
 
-    client_coro = get_mqtt_client(
+    mqttc = MqttClient(
         host = args.mqtt_host,
         port = args.mqtt_port,
         user = args.username,
         password = args.password
     )
-    tpldm = TPLinkDeviceManager(mqtt_client = get_mqtt_client(), tnba = args.tplink_target_broadcast)
+    tpldm = TPLinkDeviceManager(mqtt_client = mqttc, tnba = args.tplink_target_broadcast)
     hbt = HeartbeatTickler()
     hbt.add_corofunc(tpldm.heartbeat)
 

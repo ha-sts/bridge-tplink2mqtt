@@ -16,7 +16,7 @@ class TPLinkDeviceManager:
     def __init__(self, mqtt_client, tnba = None):
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.debug("Inputs - mqtt_client: %s, tnba: %s", mqtt_client, tnba)
-        self._mqtt_client = await mqtt_client # FIXME: Should a coroutine be passed in here?
+        self._mqtt_client = mqtt_client
         self.target_network_broadcast_address = tnba
         self.devices = []
 
