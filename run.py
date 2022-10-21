@@ -82,7 +82,7 @@ def main():
     logging.debug("args: %s", args)
 
     # Setup the async tasks
-    #loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
 
     # FIXME: Look into the contextlib / context manager stuff
 
@@ -100,12 +100,12 @@ def main():
     hbt = HeartbeatTickler()
     hbt.add_corofunc(tpldm.heartbeat)
 
-    task_mqtt_listener = asyncio.create_task(mqttc.run())
-    task_discovery = asyncio.create_task(tpldm.discover_devices())
-    task_tickler = asyncio.create_task(hbt.run())
+    task_mqtt_listener = loop.create_task(mqttc.run())
+    task_discovery = loop.create_task(tpldm.discover_devices())
+    task_tickler = loop.create_task(hbt.run())
 
     # Run the tasks
-    asyncio.run_forever()
+    loop.run_forever()
 
     # Catch and clean-up
     # FIXME: Should make this catch the keyboard interrupt (and possibly others)
