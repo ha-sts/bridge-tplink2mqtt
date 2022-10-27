@@ -69,5 +69,5 @@ class TPLinkDeviceManager:
             await self.heartbeat()
 
     async def heartbeat(self):
-        for i in self.devices:
-            asyncio.create_task(i.heartbeat())
+        for dev in self.devices.values():
+            asyncio.create_task(dev.heartbeat())

@@ -30,23 +30,56 @@ class TPLinkDevice:
         self.logger.debug("Inputs - mqtt_client: %s, device: %s", mqtt_client, kasa_device)
         self._mqtt_client = mqtt_client
         self._kasa_device = kasa_device
-        # FIXME: Are these safe enough to convert to properties that access the
-        #        _kasa_device?
         # FIXME: Can the _kasa_device handle reconnections, either manually or
         #        automagically?
         self.host = self._kasa_device.host
         self.mac = self._kasa_device.mac
         self.always_publish = always_publish
+        self._previous_outputs = []
+        self._previous_outputs[0] = False
 
     async def _check_outputs(self):
-        raise NotImplementedError
+        self.logger.warning("Checking outputs for unknown device type: %s", self._kasa_device.model)
+        # NOTE: This assumes that the device is a "single switch", which is a generic mode supported by the kasa library
+        if self.always_publish or (self._kasa_device.is_on != self._previous_outputs[0]):
+            # State changed, so update previous and emit a message
+            self._previous_outputs[0] = self._kasa_device.is_on
+            # Should the MAC address have the ':' characters removed?
+            await self._mqtt_client.publish(
+                "hasts/switch/{}/0/state".format(self.mac),
+                "on" if self._kasa_device.is_on else "off"
+            )
 
     async def _check_energy(self):
         # By default, there's no energy metering.
         pass
 
+    async def _handle_message(self, message):
+        self.logger.warning("Handling message for unknown device type: %s", self._kasa_device.model)
+        self.logger.debug("received message: %s", message)
+        tmp_payload = message.payload.decode('utf-8')
+        if tmp_payload == 'on':
+            # Send the turn on command
+            await self._kasa_device.turn_on()
+        elif tmp_payload == 'off':
+            # Send the turn off command
+            await self._kasa_device.turn_off()
+        # Run the heartbeat to update the state.
+        await self.heartbeat()
+
     async def register_coroutines(self):
-        raise NotImplementedError
+        self.logger.debug("Registering coroutines for unknown device type: %s", self._kasa_device.model)
+        await self._mqtt_client.register_topic_coroutine(
+            "hasts/switch/{}/0/change_state".format(self.mac),
+            self._handle_message
+        )
+
+    async def unregister_coroutines(self):
+        self.logger.debug("Unregistering coroutines for unknown device type: %s", self._kasa_device.model)
+        await self._mqtt_client.unregister_topic_coroutine(
+            "hasts/switch/{}/0/change_state".format(self.mac),
+            self._handle_message
+        )
 
     async def heartbeat(self):
         self.logger.info("Heartbeat")
