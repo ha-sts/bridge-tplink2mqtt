@@ -79,6 +79,8 @@ def main():
     tasks = []
     task_mqtt_listener = loop.create_task(mqttc.run())
     tasks.append(task_mqtt_listener)
+    task_tpldmr = loop.create_task(tpldm.register_coroutines())
+    tasks.append(task_tpldmr)
     task_ddt = loop.create_task(ddt.run())
     tasks.append(task_ddt)
     task_hbt = loop.create_task(hbt.run())

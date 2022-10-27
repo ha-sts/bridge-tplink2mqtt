@@ -20,10 +20,6 @@ class TPLinkDeviceManager:
         self.target_network_broadcast_address = tnba
         self.devices = {}
         self.always_publish = always_publish
-        # Register the command handler
-        asyncio.create_task(
-            self._mqtt_client.register_topic_coroutine("hasts/service/tplink2mqtt/control", self._handle_command)
-        )
 
     async def discover_devices(self):
         # This method runs the kasa library discovery mechanism with a coroutine
@@ -69,6 +65,10 @@ class TPLinkDeviceManager:
             # Run the device discovery process, then run the heartbeat to update all of the devices
             await self.discover_devices()
             await self.heartbeat()
+
+    async def register_coroutines(self):
+        # This should be called after the creation of this class to enable listening for messages.
+        self._mqtt_client.register_topic_coroutine("hasts/service/tplink2mqtt/control", self._handle_command)
 
     async def heartbeat(self):
         for dev in self.devices.values():
