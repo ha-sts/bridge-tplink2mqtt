@@ -6,8 +6,6 @@ import asyncio
 import logging
 import os
 
-import asyncio_mqtt
-
 from hasts.bridges.tplink2mqtt import MqttClient
 from hasts.bridges.tplink2mqtt import TPLinkDeviceManager
 
@@ -68,7 +66,7 @@ def main():
         "--always-publish",
         action = "store_true",
         help = "Always publish the state information when performing the heartbeat updates.",
-        default = True if os.getenv("HASTS_ALWAYS_PUBLISH", "false") in ['TRUE', 'True', 'true'] else False
+        default = os.getenv("HASTS_ALWAYS_PUBLISH", "false") in ['TRUE', 'True', 'true']
     )
     args = parser.parse_args()
 
@@ -95,14 +93,18 @@ def main():
     tpldm = TPLinkDeviceManager(
         mqtt_client = mqttc,
         tnba = args.tplink_target_broadcast,
-        always_publish = True if args.always_publish else False
+        always_publish = bool(args.always_publish)
     )
     hbt = HeartbeatTickler()
     hbt.add_corofunc(tpldm.heartbeat)
 
+    tasks = []
     task_mqtt_listener = loop.create_task(mqttc.run())
+    tasks.append(task_mqtt_listener)
     task_discovery = loop.create_task(tpldm.discover_devices())
+    tasks.append(task_discovery)
     task_tickler = loop.create_task(hbt.run())
+    tasks.append(task_tickler)
 
     # Run the tasks
     loop.run_forever()

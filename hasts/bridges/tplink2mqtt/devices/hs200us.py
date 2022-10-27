@@ -19,7 +19,6 @@ class HS200US(TPLinkDevice):
         super().__init__(mqtt_client, kasa_device, always_publish)
         # self.logger = logging.getLogger(type(self).__name__)
         self.logger.debug("Inputs - mqtt_client: %s, device: %s", mqtt_client, kasa_device)
-        # FIXME: Does super().__init__(...) use the correct __name__ for the logger?
         self._previous_output = False
 
     async def _check_outputs(self):

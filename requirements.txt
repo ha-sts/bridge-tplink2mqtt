@@ -1,2 +1,4 @@
 python-kasa
 asyncio-mqtt
+pylint
+radon
