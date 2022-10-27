@@ -18,10 +18,10 @@ class TPLinkDeviceManager:
         self.logger.debug("Inputs - mqtt_client: %s, tnba: %s", mqtt_client, tnba)
         self._mqtt_client = mqtt_client
         self.target_network_broadcast_address = tnba
-        self.devices = []
+        self.devices = {}
         self.always_publish = always_publish
         # Register the command handler
-        self._mqtt_client.register_topic_coroutine("hasts/service/tplink2mqtt", self._handle_command)
+        self._mqtt_client.register_topic_coroutine("hasts/service/tplink2mqtt/control", self._handle_command)
 
     async def discover_devices(self):
         # This method runs the kasa library discovery mechanism with a coroutine
@@ -35,37 +35,29 @@ class TPLinkDeviceManager:
     async def _device_discovered(self, kasa_device):
         self.logger.info("Device Discovered: %s", kasa_device)
         # Check to see if the discovered device is already in the devices list.
-        # Note: This could be more efficiently performed using a dictionary, but
-        #       the likelyhood of that many devices on a given network is low.
-        found = False
-        for item in self.devices:
-            # If mac addresses are the same
-            if kasa_device.mac == item.mac:
-                self.logger.debug("Found device in known list.")
-                found = True
-                # Same device, make sure hostname or IP address is still the same
-                if kasa_device.host != item.host:
-                    # Replace the device in the list
-                    self.logger.debug("Host value changed, updating known list.")
-                    await self._remove_device(item)
-                    await self._create_device(kasa_device)
-        # if not, add to the devices list
-        if not found:
-            await self._create_device(kasa_device)
+        if kasa_device.mac in self.devices:
+            # Device exists, check the host name
+            if kasa_device.host == self.devices[kasa_device.mac].host:
+                # Same device, same host, all is well, so do nothing
+                return
+            # Remove the device from the list
+            self.logger.debug("Host value changed, updating known list.")
+            await self._remove_device(kasa_device.mac)
+        # Device not in list, so create
+        await self._create_device(kasa_device)
 
     async def _create_device(self, kasa_device):
         self.logger.debug("Inputs - kasa_device: %s", kasa_device)
         dev_class = get_device_class(kasa_device.model)
         self.logger.debug("dev_class: %s", dev_class)
-        tmp_dev = dev_class(self._mqtt_client, kasa_device, self.always_publish)
-        await tmp_dev.register_coroutines()
-        self.devices.append(tmp_dev)
+        self.devices[kasa_device.mac] = dev_class(self._mqtt_client, kasa_device, self.always_publish)
+        await self.devices[kasa_device.mac].register_coroutines()
         self.logger.debug("self.devices: %s", self.devices)
 
-    async def _remove_device(self, tp_device):
-        self.logger.debug("Inputs - tp_device: %s", tp_device)
-        self.devices.remove(tp_device)
-        await tp_device.unregister_coroutines()
+    async def _remove_device(self, tp_device_mac):
+        self.logger.debug("Inputs - tp_device_mac: %s", tp_device_mac)
+        await self.devices[tp_device_mac].unregister_coroutines()
+        del self.devices[tp_device_mac]
         self.logger.debug("self.devices: %s", self.devices)
 
     async def _handle_command(self, message):
