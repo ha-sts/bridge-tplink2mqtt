@@ -3,6 +3,8 @@
 ### IMPORTS ###
 import logging
 
+from kasa.exceptions import SmartDeviceException
+
 ### GLOBALS ###
 
 ### FUNCTIONS ###
@@ -84,10 +86,10 @@ class TPLinkDevice:
     async def heartbeat(self):
         self.logger.info("Heartbeat")
         # Try a device update.
-        # FIXME: Record offline state if there's a timeout.  Issue a status message.
-        # FIXME: If the previous state was offline and the device becomes responsive,
-        #        record online state and issue a status message.
-        await self._kasa_device.update()
+        try:
+            await self._kasa_device.update()
+        except SmartDeviceException as ex:
+            self.logger.info("Communication issue: %s", ex)
         # If the new state of the output(s) is different than the old state,
         # issue a state message
         await self._check_outputs()
