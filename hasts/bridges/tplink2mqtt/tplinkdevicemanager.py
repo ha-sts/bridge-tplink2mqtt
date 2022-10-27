@@ -21,7 +21,9 @@ class TPLinkDeviceManager:
         self.devices = {}
         self.always_publish = always_publish
         # Register the command handler
-        self._mqtt_client.register_topic_coroutine("hasts/service/tplink2mqtt/control", self._handle_command)
+        asyncio.create_task(
+            self._mqtt_client.register_topic_coroutine("hasts/service/tplink2mqtt/control", self._handle_command)
+        )
 
     async def discover_devices(self):
         # This method runs the kasa library discovery mechanism with a coroutine
