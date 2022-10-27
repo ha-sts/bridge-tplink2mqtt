@@ -2,11 +2,13 @@
 
 ### IMPORTS ###
 from .tplinkdevice import TPLinkDevice
+from .hs105us import HS105US
 from .hs200us import HS200US
 from .kp400us import KP400US
 
 ### GLOBALS ###
 MODEL_DICT = {
+    "HS105(US)": HS105US,
     "HS200(US)": HS200US,
     "KP400(US)": KP400US
 }
