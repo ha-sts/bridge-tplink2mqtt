@@ -65,6 +65,8 @@ class TPLinkDeviceManager:
             # Run the device discovery process, then run the heartbeat to update all of the devices
             await self.discover_devices()
             await self.heartbeat()
+        if tmp_payload == 'heartbeat':
+            await self.heartbeat()
 
     async def register_coroutines(self):
         # This should be called after the creation of this class to enable listening for messages.
