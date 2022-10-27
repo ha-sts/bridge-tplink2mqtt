@@ -82,8 +82,6 @@ def main():
     # Setup the async tasks
     loop = asyncio.get_event_loop()
 
-    # FIXME: Look into the contextlib / context manager stuff
-
     mqttc = MqttClient(
         host = args.mqtt_host,
         port = args.mqtt_port,

@@ -1,0 +1,13 @@
+[Unit]
+Description=TPLink 2 MQTT
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+
+WorkingDirectory=<path to this checkout>
+ExecStart=/bin/sh run.sh
+
+[Install]
+WantedBy=multi-user.target

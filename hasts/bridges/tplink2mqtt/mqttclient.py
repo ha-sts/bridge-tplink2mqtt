@@ -45,7 +45,7 @@ class MqttClient:
                             self.logger.debug("  qos: %s", message.qos)
                             await self._relay_message_to_topic_coroutines(message)
             except asyncio_mqtt.MqttError as error:
-                self.logger.warning("MQTT Error: %s")
+                self.logger.warning("MQTT Error: %s", error)
                 if self.reconnect_interval > 0:
                     self.logger.info("Reconnecting in %d seconds", self.reconnect_interval)
                     await asyncio.sleep(self.reconnect_interval)
@@ -56,6 +56,7 @@ class MqttClient:
     async def register_topic_coroutine(self, topic, coroutine):
         # Register a coroutine (async function) to get tasked when a message matching the topic arrives
         # FIXME: Support wildcard paths in the future
+        self.logger.info("Registering topic: %s", topic)
         self._topic_coroutines.append({
             "topic": topic,
             "coroutine": coroutine
@@ -65,6 +66,7 @@ class MqttClient:
         # Unregister a coroutine
         # FIXME: Support wildcards?
         # FIXME: Should this be 'unregister_coroutine' that would remove all references to the coroutine?
+        self.logger.info("Unregistering topic: %s", topic)
         for item in self._topic_coroutines:
             if item['topic'] == topic and item['coroutine'] == coroutine:
                 self._topic_coroutines.remove(item)
@@ -78,14 +80,15 @@ class MqttClient:
                 asyncio.create_task(tmp_coro(message))
 
     async def publish(self, topic, payload):
-        tmp_client = await self._get_client()
+        self.logger.info("Publishing topic: %s, payload: %s", topic, payload)
+        #tmp_client = await self._get_client()
         # NOTE: There are more options available:
-        #       https://github.com/sbtinstruments/asyncio-mqtt/blob/d1c75369bcfcf3b4e6631d2bc228509e9160fd9c/asyncio_mqtt/client.py#L389
-        await tmp_client.publish(topic = topic, payload = payload)
+        #       https://github.com/sbtinstruments/asyncio-mqtt/blob/master/asyncio_mqtt/client.py#L389
+        await self._client.publish(topic = topic, payload = payload)
 
-    async def _get_client(self):
-        # Check to see if the client is created
-        if self._client is None or not self._running:
-            # FIXME: What's the best way to start this if the client isn't running?  Or should it just throw an error?
-            pass
-        return self._client
+    # async def _get_client(self):
+    #     # Check to see if the client is created
+    #     if self._client is None or not self._running:
+    #         # Start the client or raise an exception
+    #         pass
+    #     return self._client

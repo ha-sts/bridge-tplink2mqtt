@@ -49,7 +49,7 @@ class TPLinkDevice:
         raise NotImplementedError
 
     async def heartbeat(self):
-        self.logger.debug("Heartbeat")
+        self.logger.info("Heartbeat")
         # Try a device update.
         # FIXME: Record offline state if there's a timeout.  Issue a status message.
         # FIXME: If the previous state was offline and the device becomes responsive,

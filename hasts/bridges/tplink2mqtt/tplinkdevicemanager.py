@@ -31,11 +31,10 @@ class TPLinkDeviceManager:
         )
 
     async def _device_discovered(self, kasa_device):
-        self.logger.debug("Device Discovered: %s", kasa_device)
+        self.logger.info("Device Discovered: %s", kasa_device)
         # Check to see if the discovered device is already in the devices list.
         # Note: This could be more efficiently performed using a dictionary, but
         #       the likelyhood of that many devices on a given network is low.
-        # FIXME: The first pass of this is ugly, refactor at some point.
         found = False
         for item in self.devices:
             # If mac addresses are the same
@@ -43,10 +42,7 @@ class TPLinkDeviceManager:
                 self.logger.debug("Found device in known list.")
                 found = True
                 # Same device, make sure hostname or IP address is still the same
-                if kasa_device.host == item.host:
-                    # All is well, moving on
-                    break
-                else:
+                if kasa_device.host != item.host:
                     # Replace the device in the list
                     self.logger.debug("Host value changed, updating known list.")
                     await self._remove_device(item)
