@@ -11,3 +11,6 @@ ExecStart=/bin/sh run.sh
 
 [Install]
 WantedBy=multi-user.target
+
+# Info for adding to this later:
+# https://flatcar-linux.org/docs/latest/setup/systemd/environment-variables/
