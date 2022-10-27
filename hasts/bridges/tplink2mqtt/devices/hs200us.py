@@ -46,7 +46,7 @@ class HS200US(TPLinkDevice):
         await self.heartbeat()
 
     async def register_coroutines(self):
-        # FIXME: Can refactory this to be a nice data structure that the base class processes.
+        # FIXME: Can refactor this to be a nice data structure that the base class processes.
         self.logger.debug("Registering coroutines")
         await self._mqtt_client.register_topic_coroutine(
             "hasts/switch/{}/0/change_state".format(self.mac),
@@ -54,7 +54,7 @@ class HS200US(TPLinkDevice):
         )
 
     async def unregister_coroutines(self):
-        # FIXME: Can refactory this to be a nice data structure that the base class processes.
+        # FIXME: Can refactor this to be a nice data structure that the base class processes.
         self.logger.debug("Unregistering coroutines")
         await self._mqtt_client.unregister_topic_coroutine(
             "hasts/switch/{}/0/change_state".format(self.mac),

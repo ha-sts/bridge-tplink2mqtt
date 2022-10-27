@@ -6,6 +6,7 @@ import asyncio
 import logging
 import os
 
+from hasts.bridges.tplink2mqtt import MethodTickler
 from hasts.bridges.tplink2mqtt import MqttClient
 from hasts.bridges.tplink2mqtt import TPLinkDeviceManager
 
@@ -14,28 +15,6 @@ from hasts.bridges.tplink2mqtt import TPLinkDeviceManager
 ### FUNCTIONS ###
 
 ### CLASSES ###
-class HeartbeatTickler:
-    def __init__(self):
-        self.logger = logging.getLogger(type(self).__name__)
-        self._corofuncs = []
-        self._stop = False
-
-    def add_corofunc(self, corofunc):
-        # NOTE: The coroutine generating method supplied should not require arguments
-        #       For later improvement: https://stackoverflow.com/a/65755581
-        self._corofuncs.append(corofunc)
-
-    def stop(self):
-        self._stop = True
-
-    async def run(self):
-        while not self._stop:
-            self.logger.debug("Tickling 'em Heartbeats")
-            cororuns = []
-            for i in self._corofuncs:
-                cororuns.append(i())
-            await asyncio.gather(*cororuns)
-            await asyncio.sleep(300) # Every five minutes for now.
 
 ### MAIN ###
 def main():
@@ -93,16 +72,17 @@ def main():
         tnba = args.tplink_target_broadcast,
         always_publish = bool(args.always_publish)
     )
-    hbt = HeartbeatTickler()
-    hbt.add_corofunc(tpldm.heartbeat)
+    # Run the discovery every day and the heartbeat for state update every five minutes.
+    ddt = MethodTickler(seconds = 86400, corofunc = tpldm.discover_devices)
+    hbt = MethodTickler(seconds = 300, corofunc = tpldm.heartbeat)
 
     tasks = []
     task_mqtt_listener = loop.create_task(mqttc.run())
     tasks.append(task_mqtt_listener)
-    task_discovery = loop.create_task(tpldm.discover_devices())
-    tasks.append(task_discovery)
-    task_tickler = loop.create_task(hbt.run())
-    tasks.append(task_tickler)
+    task_ddt = loop.create_task(ddt.run())
+    tasks.append(task_ddt)
+    task_hbt = loop.create_task(hbt.run())
+    tasks.append(task_hbt)
 
     # Run the tasks
     loop.run_forever()

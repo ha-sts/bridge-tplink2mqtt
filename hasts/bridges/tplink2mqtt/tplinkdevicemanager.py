@@ -20,6 +20,8 @@ class TPLinkDeviceManager:
         self.target_network_broadcast_address = tnba
         self.devices = []
         self.always_publish = always_publish
+        # Register the command handler
+        self._mqtt_client.register_topic_coroutine("hasts/service/tplink2mqtt", self._handle_command)
 
     async def discover_devices(self):
         # This method runs the kasa library discovery mechanism with a coroutine
@@ -65,6 +67,14 @@ class TPLinkDeviceManager:
         self.devices.remove(tp_device)
         await tp_device.unregister_coroutines()
         self.logger.debug("self.devices: %s", self.devices)
+
+    async def _handle_command(self, message):
+        self.logger.debug("received command message: %s", message)
+        tmp_payload = message.payload.decode('utf-8')
+        if tmp_payload == 'discover':
+            # Run the device discovery process, then run the heartbeat to update all of the devices
+            await self.discover_devices()
+            await self.heartbeat()
 
     async def heartbeat(self):
         for i in self.devices:
