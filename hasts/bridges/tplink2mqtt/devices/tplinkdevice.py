@@ -36,7 +36,7 @@ class TPLinkDevice:
         self.mac = self._kasa_device.mac
         self.always_publish = always_publish
         self._previous_outputs = []
-        self._previous_outputs[0] = False
+        self._previous_outputs.append(False)
 
     async def _check_outputs(self):
         self.logger.warning("Checking outputs for unknown device type: %s", self._kasa_device.model)

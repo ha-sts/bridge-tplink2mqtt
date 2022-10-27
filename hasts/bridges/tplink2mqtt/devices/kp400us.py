@@ -19,8 +19,9 @@ class KP400US(TPLinkDevice):
         super().__init__(mqtt_client, kasa_device, always_publish)
         # self.logger = logging.getLogger(type(self).__name__)
         self.logger.debug("Inputs - mqtt_client: %s, device: %s", mqtt_client, kasa_device)
-        self._previous_outputs[0] = False
-        self._previous_outputs[1] = False
+        # Add two entries to the previous outputs list
+        self._previous_outputs.append(False)
+        self._previous_outputs.append(False)
 
     async def _check_outputs(self):
         self.logger.debug("Checking outputs")

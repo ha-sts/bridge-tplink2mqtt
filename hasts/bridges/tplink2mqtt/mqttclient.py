@@ -55,7 +55,6 @@ class MqttClient:
 
     async def register_topic_coroutine(self, topic, coroutine):
         # Register a coroutine (async function) to get tasked when a message matching the topic arrives
-        # FIXME: Support wildcard paths in the future
         self.logger.info("Registering topic: %s", topic)
         self._topic_coroutines.append({
             "topic": topic,
@@ -64,8 +63,6 @@ class MqttClient:
 
     async def unregister_topic_coroutine(self, topic, coroutine):
         # Unregister a coroutine
-        # FIXME: Support wildcards?
-        # FIXME: Should this be 'unregister_coroutine' that would remove all references to the coroutine?
         self.logger.info("Unregistering topic: %s", topic)
         for item in self._topic_coroutines:
             if item['topic'] == topic and item['coroutine'] == coroutine:
@@ -74,7 +71,6 @@ class MqttClient:
     async def _relay_message_to_topic_coroutines(self, message):
         # Send the received message to any registered coroutines with a matching topic
         for item in self._topic_coroutines:
-            # FIXME: Support wildcard paths in the future
             if item['topic'] == message.topic:
                 tmp_coro = item['coroutine']
                 asyncio.create_task(tmp_coro(message))
@@ -85,10 +81,3 @@ class MqttClient:
         # NOTE: There are more options available:
         #       https://github.com/sbtinstruments/asyncio-mqtt/blob/master/asyncio_mqtt/client.py#L389
         await self._client.publish(topic = topic, payload = payload)
-
-    # async def _get_client(self):
-    #     # Check to see if the client is created
-    #     if self._client is None or not self._running:
-    #         # Start the client or raise an exception
-    #         pass
-    #     return self._client
