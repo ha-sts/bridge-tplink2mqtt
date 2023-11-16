@@ -10,6 +10,8 @@ import asyncio_mqtt
 ### FUNCTIONS ###
 
 ### CLASSES ###
+# FIXME: It appears as asyncio_mqtt has been renamed to aiomqtt.  Need to update this to use the newer version of the
+#        library with the new name.
 class MqttClient:
     def __init__(self, host = "localhost", port = 1883, user = None, password = None):
         self.logger = logging.getLogger(type(self).__name__)
@@ -79,5 +81,7 @@ class MqttClient:
         self.logger.info("Publishing topic: %s, payload: %s", topic, payload)
         #tmp_client = await self._get_client()
         # NOTE: There are more options available:
-        #       https://github.com/sbtinstruments/asyncio-mqtt/blob/master/asyncio_mqtt/client.py#L389
-        await self._client.publish(topic = topic, payload = payload)
+        #       https://sbtinstruments.github.io/aiomqtt/publishing-a-message.html
+        # NOTE: Setting retain on all messages being sent.  This is needed for the "state" topics to allow instant
+        #       status update when starting or restarting various managers, such as Home Assistant.
+        await self._client.publish(topic = topic, payload = payload, retain = True)
