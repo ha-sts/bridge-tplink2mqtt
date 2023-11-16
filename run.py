@@ -15,6 +15,7 @@ from hasts.bridges.tplink2mqtt import TPLinkDeviceManager
 
 ### FUNCTIONS ###
 async def wrapper(args):
+    logging.debug("Starting wrapper with args: %s", args)
     # Setup the mqtt client and device manager
     mqttc = MqttClient(
         host = args.mqtt_host,
