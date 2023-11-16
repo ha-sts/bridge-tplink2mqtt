@@ -74,6 +74,8 @@ class MqttClient:
         self.logger.debug("Relaying message: %s", message)
         for item in self._topic_coroutines:
             self.logger.debug("  checking item: %s", item)
+            self.logger.debug("  item['topic'] - type: %s, value: %s", type(item['topic']), str(item['topic']))
+            self.logger.debug("  message.topic - type: %s, value: %s", type(message.topic), str(message.topic))
             if item['topic'] == message.topic:
                 self.logger.debug("  item matched")
                 tmp_coro = item['coroutine']
