@@ -1,4 +1,4 @@
 python-kasa
-asyncio-mqtt
+aiomqtt
 pylint
 radon

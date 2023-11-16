@@ -3,15 +3,13 @@
 ### IMPORTS ###
 import logging
 import asyncio
-import asyncio_mqtt
+import aiomqtt
 
 ### GLOBALS ###
 
 ### FUNCTIONS ###
 
 ### CLASSES ###
-# FIXME: It appears as asyncio_mqtt has been renamed to aiomqtt.  Need to update this to use the newer version of the
-#        library with the new name.
 class MqttClient:
     def __init__(self, host = "localhost", port = 1883, user = None, password = None):
         self.logger = logging.getLogger(type(self).__name__)
@@ -29,7 +27,7 @@ class MqttClient:
     async def run(self):
         while not self._stop:
             try:
-                async with asyncio_mqtt.Client(
+                async with aiomqtt.Client(
                     hostname = self.host,
                     port = self.port,
                     username = self.user,
@@ -46,7 +44,7 @@ class MqttClient:
                             self.logger.debug("  payload: %s", message.payload)
                             self.logger.debug("  qos: %s", message.qos)
                             await self._relay_message_to_topic_coroutines(message)
-            except asyncio_mqtt.MqttError as error:
+            except aiomqtt.MqttError as error:
                 self.logger.warning("MQTT Error: %s", error)
                 if self.reconnect_interval > 0:
                     self.logger.info("Reconnecting in %d seconds", self.reconnect_interval)
