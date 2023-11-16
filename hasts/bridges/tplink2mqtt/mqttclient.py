@@ -73,7 +73,9 @@ class MqttClient:
         # Send the received message to any registered coroutines with a matching topic
         self.logger.debug("Relaying message: %s", message)
         for item in self._topic_coroutines:
+            self.logger.debug("  checking item: %s", item)
             if item['topic'] == message.topic:
+                self.logger.debug("  item matched")
                 tmp_coro = item['coroutine']
                 # NOTE: This should probably store the task object into a list,
                 #       then have some regular process come through and clean up
@@ -82,7 +84,9 @@ class MqttClient:
                 #       will be handled at a time, but that should be fine for
                 #       now.
                 # asyncio.create_task(tmp_coro(message))
-                await asyncio.create_task(tmp_coro(message))
+                tmp_task = asyncio.create_task(tmp_coro(message))
+                self.logger.debug("  created task: %s", tmp_task)
+                await tmp_task
 
     async def publish(self, topic, payload):
         self.logger.info("Publishing topic: %s, payload: %s", topic, payload)
