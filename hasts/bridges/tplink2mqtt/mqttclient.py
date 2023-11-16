@@ -76,7 +76,8 @@ class MqttClient:
             self.logger.debug("  checking item: %s", item)
             self.logger.debug("  item['topic'] - type: %s, value: %s", type(item['topic']), str(item['topic']))
             self.logger.debug("  message.topic - type: %s, value: %s", type(message.topic), str(message.topic))
-            if item['topic'] == message.topic:
+            # NOTE: Now, for some silly reason, `message.topic` is of type `aiomqtt.client.Topic` and not just a string.
+            if item['topic'] == str(message.topic):
                 self.logger.debug("  item matched")
                 tmp_coro = item['coroutine']
                 # NOTE: This should probably store the task object into a list,
