@@ -34,10 +34,12 @@ async def wrapper(args):
     hbt = MethodTickler(seconds = 300, corofunc = tpldm.heartbeat)
 
     # Create tasks for each worker
-    await asyncio.create_task(mqttc.run())
-    await asyncio.create_task(tpldm.register_coroutines())
-    await asyncio.create_task(ddt.run())
-    await asyncio.create_task(hbt.run())
+    tasks = []
+    tasks.append(asyncio.create_task(mqttc.run()))
+    tasks.append(asyncio.create_task(tpldm.register_coroutines()))
+    tasks.append(asyncio.create_task(ddt.run()))
+    tasks.append(asyncio.create_task(hbt.run()))
+    await asyncio.gather(*tasks)
 
 ### CLASSES ###
 

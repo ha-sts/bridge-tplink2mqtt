@@ -35,7 +35,7 @@ class MqttClient:
                 ) as client:
                     self._client = client
                     self._running = True
-                    async with client.unfiltered_messages() as messages:
+                    async with client.messages() as messages:
                         await client.subscribe("hasts/#")
                         async for message in messages:
                             # Call a method to check topics and route commands
