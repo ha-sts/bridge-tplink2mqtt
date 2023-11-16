@@ -60,6 +60,7 @@ class MqttClient:
             "topic": topic,
             "coroutine": coroutine
         })
+        self.logger.debug("Current Coroutine List: %s", self._topic_coroutines)
 
     async def unregister_topic_coroutine(self, topic, coroutine):
         # Unregister a coroutine
@@ -70,6 +71,7 @@ class MqttClient:
 
     async def _relay_message_to_topic_coroutines(self, message):
         # Send the received message to any registered coroutines with a matching topic
+        self.logger.debug("Relaying message: %s", message)
         for item in self._topic_coroutines:
             if item['topic'] == message.topic:
                 tmp_coro = item['coroutine']
