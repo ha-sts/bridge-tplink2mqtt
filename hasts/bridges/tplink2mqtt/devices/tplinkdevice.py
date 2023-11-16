@@ -41,7 +41,9 @@ class TPLinkDevice:
         self._previous_outputs.append(False)
 
     async def _check_outputs(self):
-        self.logger.warning("Checking outputs for unknown device type: %s", self._kasa_device.model)
+        # Output a warning if using this generic class directly:
+        if type(self).__name__ == "TPLinkDevice":
+            self.logger.warning("Checking outputs for unknown device type: %s", self._kasa_device.model)
         # NOTE: This assumes that the device is a "single switch", which is a generic mode supported by the kasa library
         if self.always_publish or (self._kasa_device.is_on != self._previous_outputs[0]):
             # State changed, so update previous and emit a message
@@ -57,7 +59,9 @@ class TPLinkDevice:
         pass
 
     async def _handle_message(self, message):
-        self.logger.warning("Handling message for unknown device type: %s", self._kasa_device.model)
+        # Output a warning if using this generic class directly:
+        if type(self).__name__ == "TPLinkDevice":
+            self.logger.warning("Handling message for unknown device type: %s", self._kasa_device.model)
         self.logger.debug("received message: %s", message)
         tmp_payload = message.payload.decode('utf-8')
         if tmp_payload == 'on':
