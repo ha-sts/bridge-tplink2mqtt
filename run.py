@@ -5,6 +5,7 @@ import argparse
 import asyncio
 import logging
 import os
+import sys
 
 from hasts.bridges.tplink2mqtt import MethodTickler
 from hasts.bridges.tplink2mqtt import MqttClient
@@ -13,6 +14,29 @@ from hasts.bridges.tplink2mqtt import TPLinkDeviceManager
 ### GLOBALS ###
 
 ### FUNCTIONS ###
+async def wrapper(args):
+    # Setup the mqtt client and device manager
+    mqttc = MqttClient(
+        host = args.mqtt_host,
+        port = args.mqtt_port,
+        user = args.username,
+        password = args.password
+    )
+    tpldm = TPLinkDeviceManager(
+        mqtt_client = mqttc,
+        tnba = args.tplink_target_broadcast,
+        always_publish = bool(args.always_publish)
+    )
+
+    # Run the discovery every day and the heartbeat for state update every five minutes.
+    ddt = MethodTickler(seconds = 86400, corofunc = tpldm.discover_devices)
+    hbt = MethodTickler(seconds = 300, corofunc = tpldm.heartbeat)
+
+    # Create tasks for each worker
+    await asyncio.create_task(mqttc.run())
+    await asyncio.create_task(tpldm.register_coroutines())
+    await asyncio.create_task(ddt.run())
+    await asyncio.create_task(hbt.run())
 
 ### CLASSES ###
 
@@ -58,41 +82,14 @@ def main():
 
     logging.debug("args: %s", args)
 
-    # Setup the async tasks
-    loop = asyncio.get_event_loop()
+    # Per: https://sbtinstruments.github.io/aiomqtt/
+    # Setting the event loop on "winderps machiens"
+    if sys.platform.lower() == "win32" or os.name.lower() == "nt":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-    mqttc = MqttClient(
-        host = args.mqtt_host,
-        port = args.mqtt_port,
-        user = args.username,
-        password = args.password
-    )
-    tpldm = TPLinkDeviceManager(
-        mqtt_client = mqttc,
-        tnba = args.tplink_target_broadcast,
-        always_publish = bool(args.always_publish)
-    )
-    # Run the discovery every day and the heartbeat for state update every five minutes.
-    ddt = MethodTickler(seconds = 86400, corofunc = tpldm.discover_devices)
-    hbt = MethodTickler(seconds = 300, corofunc = tpldm.heartbeat)
-
-    tasks = []
-    task_mqtt_listener = loop.create_task(mqttc.run())
-    tasks.append(task_mqtt_listener)
-    task_tpldmr = loop.create_task(tpldm.register_coroutines())
-    tasks.append(task_tpldmr)
-    task_ddt = loop.create_task(ddt.run())
-    tasks.append(task_ddt)
-    task_hbt = loop.create_task(hbt.run())
-    tasks.append(task_hbt)
-
-    # Run the tasks
-    loop.run_forever()
-
-    # Catch and clean-up
-    # FIXME: Should make this catch the keyboard interrupt (and possibly others)
-    #        and make this shutdown gracefully, waiting for tasks and then
-    #        disconnecting MQTT
+    # NOTE: Moved contents to an async wrapper coroutine to better follow the "high-level" pattern.  This pattern uses
+    #       asyncio.run(coro), which handles much, if not all, of the cleanup and interrupts.
+    asyncio.run(wrapper(args))
 
 if __name__ == "__main__":
     main()
