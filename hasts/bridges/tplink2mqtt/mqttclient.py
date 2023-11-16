@@ -75,7 +75,14 @@ class MqttClient:
         for item in self._topic_coroutines:
             if item['topic'] == message.topic:
                 tmp_coro = item['coroutine']
-                asyncio.create_task(tmp_coro(message))
+                # NOTE: This should probably store the task object into a list,
+                #       then have some regular process come through and clean up
+                #       the completed tasks.  For now, just going to await the
+                #       handling of the message.  This means only one message
+                #       will be handled at a time, but that should be fine for
+                #       now.
+                # asyncio.create_task(tmp_coro(message))
+                await tmp_coro(message)
 
     async def publish(self, topic, payload):
         self.logger.info("Publishing topic: %s, payload: %s", topic, payload)
