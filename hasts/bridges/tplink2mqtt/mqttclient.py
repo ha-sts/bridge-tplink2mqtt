@@ -82,7 +82,7 @@ class MqttClient:
                 #       will be handled at a time, but that should be fine for
                 #       now.
                 # asyncio.create_task(tmp_coro(message))
-                await tmp_coro(message)
+                await asyncio.create_task(tmp_coro(message))
 
     async def publish(self, topic, payload):
         self.logger.info("Publishing topic: %s, payload: %s", topic, payload)
