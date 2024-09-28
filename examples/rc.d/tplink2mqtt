@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# $NetBSD: tplink2mqtt,v 0.1 2024/09/27 12:34:56 fbus Exp $
+#
+# PROVIDE: tplink2mqtt
+# REQUIRE: DAEMON
+
+$_rc_subr_loaded . /etc/rc.subr
+
+name="tplink2mqtt"
+rcvar=$name
+
+load_rc_config $name
+
+: ${tplink2mqtt_user:=tplink2mqtt}
+
+# NOTE: Fix the command, and command_args for your installation.
+# NOTE: This will show the username and password in the command line in system
+#       utilities such as `ps`.
+# FIXME: Will need to make this actually work properly once packaged
+#        for pypi and for pkgsrc.
+mqtt_username=user
+mqtt_password=pass
+mqtt_host=localhost
+mqtt_port=1883
+tplink_broadcast=192.168.0.255
+
+rundir="/home/user/bridge-tplink2mqtt"
+
+command="/usr/pkg/bin/python3.11"
+command_args="${rundir}/run.py --verbose --username ${mqtt_username} --password ${mqtt_password} --mqtt-host ${mqtt_host} --mqtt-port ${mqtt_port} --tplink-target-broadcast ${tplink_broadcast} --always-publish"
+
+piddir="/var/run/${name}"
+pidfile="${piddir}/${name}.pid"
+
+start_precmd="tplink2mqtt_precmd"
+test_cmd="tplink2mqtt_test"
+extra_commands=""
+
+tplink2mqtt_precmd()
+{
+    mkdir -p ${piddir}
+    chown ${tplink2mqtt_user} ${piddir}
+}
+
+run_rc_command "$1"
