@@ -1,4 +1,4 @@
-python-kasa
-aiomqtt
+python-kasa==0.5.4
+aiomqtt==1.2.1
 pylint
 radon
